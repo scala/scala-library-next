@@ -24,10 +24,10 @@ isReleaseJob() {
   fi
 }
 
-if [[ "$SCALAJS_VERSION" == "" ]]; then
-  projectPrefix=""
+if [[ "$SCALAJS_BUILD" == "true" ]]; then
+  projectPrefix="scala-library-nextJS/"
 else
-  projectPrefix="TODO/"
+  projectPrefix="scala-library-next/"
 fi
 
 verPat="[0-9]+\.[0-9]+\.[0-9]+(-[A-Za-z0-9-]+)?"
