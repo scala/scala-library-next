@@ -8,8 +8,10 @@ scala:
   - 2.13.3
 
 env:
-  - ADOPTOPENJDK=8
-  - ADOPTOPENJDK=11
+  - SCALAJS_BUILD=     ADOPTOPENJDK=8
+  - SCALAJS_BUILD=     ADOPTOPENJDK=11
+  - SCALAJS_BUILD=true ADOPTOPENJDK=8
+  - SCALAJS_BUILD=true ADOPTOPENJDK=11
 
 install:
   - git fetch --tags # get all tags for sbt-dynver

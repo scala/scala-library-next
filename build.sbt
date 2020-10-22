@@ -1,11 +1,24 @@
 lazy val root = project.in(file("."))
-  .settings(ScalaModulePlugin.scalaModuleSettings)
   .settings(
-    name    := "scala-library-next",
-    scalacOptions ++= Seq("-deprecation", "-feature", "-Werror"),
+    publish / skip := true
+  )
+
+lazy val `scala-library-next` = crossProject(JVMPlatform, JSPlatform)
+  .crossType(CrossType.Pure)
+  .withoutSuffixFor(JVMPlatform)
+  .in(file("."))
+  .jvmSettings(
+    libraryDependencies += "junit" % "junit" % "4.13.1" % Test,
+  )
+  .jsConfigure(_.enablePlugins(ScalaJSJUnitPlugin))
+  .settings(
+    ScalaModulePlugin.scalaModuleSettings,
     scalaModuleMimaPreviousVersion := None,
+    scalacOptions ++= Seq("-deprecation", "-feature", "-Werror"),
     libraryDependencies ++= Seq(
-      "junit" % "junit" % "4.13.1" % Test,
-      "org.scalacheck" %% "scalacheck" % "1.14.3" % Test,
-    )
+      "org.scalacheck" %%% "scalacheck" % "1.14.3" % Test,
+    ),
+  )
+  .jsSettings(
+    Test / fork := false,
   )
