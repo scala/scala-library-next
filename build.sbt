@@ -1,6 +1,10 @@
 lazy val root = project.in(file("."))
+  .aggregate(`scala-library-next`.jvm, `scala-library-next`.js)
   .settings(
-    publish / skip := true
+    publish / skip := true,
+    // With CrossType.Pure, the root project also picks up the sources in `src`
+    Compile / unmanagedSourceDirectories := Nil,
+    Test    / unmanagedSourceDirectories := Nil,
   )
 
 lazy val `scala-library-next` = crossProject(JVMPlatform, JSPlatform)
@@ -9,6 +13,8 @@ lazy val `scala-library-next` = crossProject(JVMPlatform, JSPlatform)
   .in(file("."))
   .jvmSettings(
     libraryDependencies += "junit" % "junit" % "4.13.1" % Test,
+    libraryDependencies += "com.novocode" % "junit-interface" % "0.11" % Test,
+    testOptions += Tests.Argument(TestFrameworks.JUnit, "-a", "-v"),
   )
   .jsConfigure(_.enablePlugins(ScalaJSJUnitPlugin))
   .settings(
