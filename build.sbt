@@ -1,5 +1,5 @@
 lazy val root = project.in(file("."))
-  .aggregate(`scala-library-next`.jvm, `scala-library-next`.js)
+  .aggregate(scalaLibraryNextJVM, scalaLibraryNextJS)
   .settings(
     publish / skip := true,
     // With CrossType.Pure, the root project also picks up the sources in `src`
@@ -7,9 +7,8 @@ lazy val root = project.in(file("."))
     Test    / unmanagedSourceDirectories := Nil,
   )
 
-lazy val `scala-library-next` = crossProject(JVMPlatform, JSPlatform)
+lazy val scalaLibraryNext = crossProject(JVMPlatform, JSPlatform)
   .crossType(CrossType.Pure)
-  .withoutSuffixFor(JVMPlatform)
   .in(file("."))
   .jvmSettings(
     libraryDependencies += "junit" % "junit" % "4.13.1" % Test,
@@ -28,3 +27,6 @@ lazy val `scala-library-next` = crossProject(JVMPlatform, JSPlatform)
   .jsSettings(
     Test / fork := false,
   )
+
+lazy val scalaLibraryNextJVM = scalaLibraryNext.jvm
+lazy val scalaLibraryNextJS  = scalaLibraryNext.js
