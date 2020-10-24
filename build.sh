@@ -25,9 +25,9 @@ isReleaseJob() {
 }
 
 if [[ "$SCALAJS_BUILD" == "true" ]]; then
-  projectPrefix="scala-library-nextJS/"
+  projectPrefix="scalaLibraryNextJS/"
 else
-  projectPrefix="scala-library-next/"
+  projectPrefix="scalaLibraryNextJVM/"
 fi
 
 verPat="[0-9]+\.[0-9]+\.[0-9]+(-[A-Za-z0-9-]+)?"
