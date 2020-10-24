@@ -52,6 +52,12 @@ example if you want to add a new method to an existing class, it must
 be added as an extension method. We are still discussing details on
 [issue #4](https://github.com/scala/scala-library-next/issues/4).
 
+## What if my contribution is rejected?
+
+If your contribution is collections-themed, it could find a home at [scala-collection-contrib](https://github.com/scala/scala-collection-contrib), which has a much more liberal merge policy.
+
+You might also consider publishing your code yourself in a separate library, of course.
+
 ## History
 
 The discussions that led to this repo being created are here:
