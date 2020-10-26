@@ -13,16 +13,16 @@
 package scala.collection
 package next
 
-object IteratorExtensions {
-  implicit class NextIteratorExtensions[A](private val iter: Iterator[A]) extends AnyVal {
+object IterableOnceExtensions {
+  implicit class NextIterableOnceOpsExtensions[A](private val iter: IterableOnceOps[A, Any, Any]) extends AnyVal {
     /**
-     * Partitions this Iterator into a map according to a discriminator function `key`. All the values that
+     * Partitions this IterableOnce into a map according to a discriminator function `key`. All the values that
      * have the same discriminator are then transformed by the `value` function and then reduced into a
      * single value with the `reduce` function.
      *
      * {{{
-     *   def occurrences[A](as: Iterator[A]): Map[A, Int] =
-     *     as.groupMapReduce(identity)(_ => 1)(_ + _)
+     *   def occurrences[A](as: IterableOnce[A]): Map[A, Int] =
+     *     as.iterator.groupMapReduce(identity)(_ => 1)(_ + _)
      * }}}
      *
      * @note This will force the evaluation of the Iterator.
