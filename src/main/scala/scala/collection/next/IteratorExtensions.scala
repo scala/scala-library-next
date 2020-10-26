@@ -11,9 +11,10 @@
  */
 
 package scala.collection
+package next
 
 object IteratorExtensions {
-  implicit class IteratorExtensionsOps[A](private val iter: Iterator[A]) extends AnyVal {
+  implicit class NextIteratorExtensions[A](private val iter: Iterator[A]) extends AnyVal {
     /**
      * Partitions this Iterator into a map according to a discriminator function `key`. All the values that
      * have the same discriminator are then transformed by the `value` function and then reduced into a

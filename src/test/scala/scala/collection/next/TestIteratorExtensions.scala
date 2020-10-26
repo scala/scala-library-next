@@ -10,7 +10,7 @@
  * additional information regarding copyright ownership.
  */
 
-package scala.collection
+package scala.collection.next
 
 import org.junit.Assert._
 import org.junit.Test
