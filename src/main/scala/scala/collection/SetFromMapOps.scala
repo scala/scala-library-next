@@ -196,6 +196,12 @@ object SetFromMapOps {
     protected[collection] val underlying: IterableOnce[(A, Unit)]
   }
 
+  trait DynamicClassName { self: Iterable[_] =>
+    protected[collection] val underlying: Iterable[_]
+
+    override protected[this] def className: String = s"SetFrom_${underlying.collectionClassName}"
+  }
+
   // unknown whether mutable or immutable
   trait Unknown[
       A,

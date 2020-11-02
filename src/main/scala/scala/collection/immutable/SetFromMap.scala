@@ -46,11 +46,10 @@ object SetFromMapOps {
 private class SetFromMap[A](protected[collection] val underlying: Map[A, Unit])
     extends AbstractSet[A]
     with SetFromMapOps.Unsorted[A, Map, SetFromMap]
+    with collection.SetFromMapOps.DynamicClassName
     with IterableFactoryDefaults[A, SetFromMap]
     with DefaultSerializable {
   protected[this] def fromMap[B](m: Map[B, Unit]): SetFromMap[B] = new SetFromMap(m)
-
-  override protected[this] def className: String = "SetFromMap"
 
   override def iterableFactory: IterableFactory[SetFromMap] =
     new SetFromMap.WrapperFactory(underlying.mapFactory)
@@ -73,13 +72,12 @@ private object SetFromMap extends SetFromMapMetaFactory[Map, Set] {
 private class SeqSetFromMap[A](protected[collection] val underlying: SeqMap[A, Unit])
     extends AbstractSet[A]
     with SetFromMapOps.Unsorted[A, SeqMap, SeqSetFromMap]
+    with collection.SetFromMapOps.DynamicClassName
     with SeqSet[A]
     with IterableFactoryDefaults[A, SeqSetFromMap]
     with DefaultSerializable {
   protected[this] def fromMap[B](m: SeqMap[B, Unit]): SeqSetFromMap[B] =
     new SeqSetFromMap(m)
-
-  override protected[this] def className: String = "SeqSetFromMap"
 
   override def iterableFactory: IterableFactory[SeqSetFromMap] =
     new SeqSetFromMap.WrapperFactory(underlying.mapFactory)
@@ -105,6 +103,7 @@ private class SortedSetFromMap[A](protected[collection] val underlying: SortedMa
 ) extends AbstractSet[A]
     with SetFromMapOps[A, Map, SortedMap[A, Unit], Set, SortedSetFromMap[A]]
     with collection.SetFromMapOps.Sorted[A, SortedMap, Set, SortedSetFromMap]
+    with collection.SetFromMapOps.DynamicClassName
     with SortedSet[A]
     with SortedSetOps[A, SortedSetFromMap, SortedSetFromMap[A]]
     with IterableFactoryDefaults[A, Set]
@@ -117,8 +116,6 @@ private class SortedSetFromMap[A](protected[collection] val underlying: SortedMa
 
   protected[this] def fromSortedMap[B: Ordering](m: SortedMap[B, Unit]): SortedSetFromMap[B] =
     new SortedSetFromMap(m)
-
-  override protected[this] def className: String = "SortedSetFromMap"
 
   override def iterableFactory: IterableFactory[Set] = SetFromMap(underlying.mapFactory)
 
