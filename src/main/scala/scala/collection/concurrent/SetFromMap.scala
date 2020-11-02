@@ -27,8 +27,6 @@ private class SetFromMap[A](override protected[collection] val underlying: Map[A
   override protected[this] def fromMap[B](m: mutable.Map[B, Unit]): mutable.SetFromMap[B] =
     SetFromMap.fromMutableMap(m)
 
-  override protected[this] def className: String = "SetFromMap"
-
   override def iterableFactory: IterableFactory[m.SetFromMap] =
     new SetFromMap.MutableFactory(underlying.mapFactory)
 }

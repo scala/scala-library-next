@@ -72,8 +72,8 @@ private object SetFromMap extends SetFromMapMetaFactory[Map, Set] {
 @SerialVersionUID(3L)
 private class SeqSetFromMap[A](protected[collection] val underlying: SeqMap[A, Unit])
     extends AbstractSet[A]
-    with SeqSet[A]
     with SetFromMapOps.Unsorted[A, SeqMap, SeqSetFromMap]
+    with SeqSet[A]
     with IterableFactoryDefaults[A, SeqSetFromMap]
     with DefaultSerializable {
   protected[this] def fromMap[B](m: SeqMap[B, Unit]): SeqSetFromMap[B] =
