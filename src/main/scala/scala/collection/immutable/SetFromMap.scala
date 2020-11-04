@@ -16,7 +16,7 @@ package immutable
 
 import scala.collection.generic.DefaultSerializable
 
-trait SetFromMapOps[
+private trait SetFromMapOps[
     A,
     +MM[K, +V] <: MapOps[K, V, MM, _],
     +M <: MapOps[A, Unit, MM, M],
@@ -29,7 +29,7 @@ trait SetFromMapOps[
   override def removedAll(that: IterableOnce[A]): C = fromSpecificMap(underlying removedAll that)
 }
 
-object SetFromMapOps {
+private object SetFromMapOps {
 
   trait Unsorted[
       A,

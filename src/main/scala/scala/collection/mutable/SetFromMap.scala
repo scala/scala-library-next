@@ -17,7 +17,13 @@ package mutable
 import scala.collection.SetFromMapOps.WrappedMap
 import scala.collection.generic.DefaultSerializable
 
-trait SetFromMapOps[
+// Implementation note: The `concurrent.Set` implementation
+//   inherits from this, so we have to be careful about
+//   making changes that do more than forward to the
+//   underlying `Map`. If we have a method implementation
+//   that is not atomic, we MUST override that method in
+//   `concurrent.SetFromMap`.
+private[collection] trait SetFromMapOps[
     A,
     +MM[K, V] <: MapOps[K, V, MM, _],
     +M <: MapOps[A, Unit, MM, M],
@@ -45,7 +51,8 @@ trait SetFromMapOps[
 
   override def subtractAll(xs: IterableOnce[A]): this.type = { underlying.subtractAll(xs); this }
 
-  override def knownSize: Int = underlying.knownSize
+  // We need to define this explicitly because there's a multiple inheritance diamond
+  override def knownSize: Int = super[SetFromMapOps].knownSize
 }
 
 @SerialVersionUID(3L)
