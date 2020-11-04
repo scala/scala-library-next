@@ -147,8 +147,8 @@ private object SortedSetFromMap extends SortedSetFromMapMetaFactory[SortedMap, S
   @SerialVersionUID(3L)
   private final class WrapperFactory(mf: SortedMapFactory[SortedMap])
       extends SortedSetFromMapFactory[SortedMap, SortedSetFromMap](mf) {
-    protected[this] def fromMap[A: Ordering](map: SortedMap[A, Unit]): SortedSetFromMap[A] =
-      new SortedSetFromMap(map)
+    protected[this] def fromMap[A](map: SortedMap[A, Unit]): SortedSetFromMap[A] =
+      new SortedSetFromMap(map)(map.ordering)
   }
 
 }

@@ -351,7 +351,7 @@ private abstract class SortedSetFromMapFactory[+MM[K, V] <: SortedMap[K, V], +CC
 ]](mf: SortedMapFactory[MM])
     extends SortedIterableFactory[CC]
     with Serializable {
-  protected[this] def fromMap[A: Ordering](map: MM[A, Unit]): CC[A]
+  protected[this] def fromMap[A](map: MM[A, Unit]): CC[A]
 
   def from[A: Ordering](it: IterableOnce[A]): CC[A] =
     it match {
