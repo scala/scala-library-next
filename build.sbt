@@ -1,18 +1,19 @@
-lazy val root = project.in(file("."))
+lazy val root = project
+  .in(file("."))
   .aggregate(scalaLibraryNextJVM, scalaLibraryNextJS)
   .settings(
     publish / skip := true,
     // With CrossType.Pure, the root project also picks up the sources in `src`
     Compile / unmanagedSourceDirectories := Nil,
-    Test    / unmanagedSourceDirectories := Nil,
+    Test / unmanagedSourceDirectories := Nil,
   )
 
 lazy val scalaLibraryNext = crossProject(JVMPlatform, JSPlatform)
   .crossType(CrossType.Pure)
   .in(file("."))
   .jvmSettings(
-    libraryDependencies += "junit" % "junit" % "4.13.1" % Test,
-    libraryDependencies += "com.novocode" % "junit-interface" % "0.11" % Test,
+    libraryDependencies += "junit"        % "junit"           % "4.13.1" % Test,
+    libraryDependencies += "com.novocode" % "junit-interface" % "0.11"   % Test,
     testOptions += Tests.Argument(TestFrameworks.JUnit, "-a", "-v"),
   )
   .jsConfigure(_.enablePlugins(ScalaJSJUnitPlugin))
@@ -21,11 +22,11 @@ lazy val scalaLibraryNext = crossProject(JVMPlatform, JSPlatform)
     scalaModuleMimaPreviousVersion := None,
     scalacOptions ++= Seq("-deprecation", "-feature", "-Werror"),
     libraryDependencies ++= Seq(
-      "org.scalacheck" %%% "scalacheck" % "1.15.0" % Test,
+      "org.scalacheck" %%% "scalacheck" % "1.15.0" % Test
     ),
   )
   .jsSettings(
-    Test / fork := false,
+    Test / fork := false
   )
 
 lazy val scalaLibraryNextJVM = scalaLibraryNext.jvm
