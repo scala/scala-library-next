@@ -18,7 +18,7 @@ import scala.collection.generic.DefaultSerializable
 import scala.collection.{mutable => m}
 
 @SerialVersionUID(3L)
-private class SetFromMap[A](override protected[collection] val underlying: Map[A, Unit])
+private[collection] class SetFromMap[A](override protected[collection] val underlying: Map[A, Unit])
     extends mutable.SetFromMap[A](underlying)
     with Set[A]
     with mutable.SetFromMapOps[A, m.Map, m.Map[A, Unit], m.SetFromMap, m.SetFromMap[A]]
@@ -31,8 +31,8 @@ private class SetFromMap[A](override protected[collection] val underlying: Map[A
     new SetFromMap.MutableFactory(underlying.mapFactory)
 }
 
-private object SetFromMap extends SetFromMapMetaFactory[Map, Set] {
-  def apply(factory: MapFactory[Map]): IterableFactory[SetFromMap] = new WrapperFactory(factory)
+private[collection] object SetFromMap extends SetFromMapMetaFactory[Map, Set] {
+  def apply(factory: MapFactory[Map]): IterableFactory[Set] = new WrapperFactory(factory)
 
   def apply[A](map: Map[A, Unit]): Set[A] = new SetFromMap(map)
 

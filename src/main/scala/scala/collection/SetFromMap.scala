@@ -30,14 +30,28 @@ private class SetFromMap[A](protected[collection] val underlying: Map[A, Unit])
 }
 
 private object SetFromMap extends SetFromMapMetaFactory[Map, Set] {
-  def apply(factory: MapFactory[Map]): IterableFactory[Set] = new WrapperFactory(factory)
+  def apply(factory: MapFactory[Map]): IterableFactory[Set] = new DynamicFactory(factory)
 
-  def apply[A](map: Map[A, Unit]): Set[A] = new SetFromMap(map)
+  // Dynamically create a narrower return type as a best-effort
+  //   not to lose runtime type information from the `Map`.
+  def apply[A](map: Map[A, Unit]): Set[A] = map match {
+    case map: immutable.Map[A, Unit]  => immutable.SetFromMap(map)
+    case map: concurrent.Map[A, Unit] => concurrent.SetFromMap(map)
+    case map: mutable.Map[A, Unit]    => mutable.SetFromMap(map)
+    case map: SeqMap[A, Unit]         => new SeqSetFromMap(map)
+    case map: SortedMap[A, Unit]      => new SortedSetFromMap(map)(map.ordering)
+    case map                          => new SetFromMap(map)
+  }
 
   @SerialVersionUID(3L)
   private class WrapperFactory(mf: MapFactory[Map]) extends SetFromMapFactory[Map, SetFromMap](mf) {
     protected[this] def fromMap[A](map: Map[A, Unit]): SetFromMap[A] =
       new SetFromMap(map)
+  }
+
+  @SerialVersionUID(3L)
+  private class DynamicFactory(mf: MapFactory[Map]) extends SetFromMapFactory[Map, Set](mf) {
+    protected[this] def fromMap[A](map: Map[A, Unit]): Set[A] = SetFromMap(map)
   }
 
 }
@@ -58,15 +72,25 @@ private class SeqSetFromMap[A](protected[collection] val underlying: SeqMap[A, U
 }
 
 private object SeqSetFromMap extends SetFromMapMetaFactory[SeqMap, SeqSet] {
-  def apply(factory: MapFactory[SeqMap]): IterableFactory[SeqSet] = new WrapperFactory(factory)
+  def apply(factory: MapFactory[SeqMap]): IterableFactory[SeqSet] = new DynamicFactory(factory)
 
-  def apply[A](map: SeqMap[A, Unit]): SeqSet[A] = new SeqSetFromMap(map)
+  def apply[A](map: SeqMap[A, Unit]): SeqSet[A] = map match {
+    case map: immutable.SeqMap[A, Unit] => immutable.SeqSetFromMap(map)
+    case map: mutable.SeqMap[A, Unit]   => mutable.SeqSetFromMap(map)
+    case map                            => new SeqSetFromMap(map)
+  }
 
   @SerialVersionUID(3L)
   private class WrapperFactory(mf: MapFactory[SeqMap])
       extends SetFromMapFactory[SeqMap, SeqSetFromMap](mf) {
     protected[this] def fromMap[A](map: SeqMap[A, Unit]): SeqSetFromMap[A] =
       new SeqSetFromMap(map)
+  }
+
+  @SerialVersionUID(3L)
+  private class DynamicFactory(mf: MapFactory[SeqMap])
+      extends SetFromMapFactory[SeqMap, SeqSet](mf) {
+    protected[this] def fromMap[A](map: SeqMap[A, Unit]): SeqSet[A] = SeqSetFromMap(map)
   }
 
 }
@@ -96,15 +120,26 @@ private class SortedSetFromMap[A](protected[collection] val underlying: SortedMa
 
 private object SortedSetFromMap extends SortedSetFromMapMetaFactory[SortedMap, SortedSet] {
   def apply(factory: SortedMapFactory[SortedMap]): SortedIterableFactory[SortedSet] =
-    new WrapperFactory(factory)
+    new DynamicFactory(factory)
 
-  def apply[A](map: SortedMap[A, Unit]): SortedSet[A] = new SortedSetFromMap(map)(map.ordering)
+  def apply[A](map: SortedMap[A, Unit]): SortedSet[A] = map match {
+    case map: immutable.SortedMap[A, Unit] => immutable.SortedSetFromMap(map)
+    case map: mutable.SortedMap[A, Unit]   => mutable.SortedSetFromMap(map)
+    case map                               => new SortedSetFromMap(map)(map.ordering)
+  }
 
   @SerialVersionUID(3L)
   private final class WrapperFactory(mf: SortedMapFactory[SortedMap])
       extends SortedSetFromMapFactory[SortedMap, SortedSetFromMap](mf) {
     protected[this] def fromMap[A](map: SortedMap[A, Unit]): SortedSetFromMap[A] =
       new SortedSetFromMap(map)(map.ordering)
+  }
+
+  @SerialVersionUID(3L)
+  private class DynamicFactory(mf: SortedMapFactory[SortedMap])
+      extends SortedSetFromMapFactory[SortedMap, SortedSet](mf) {
+    protected[this] def fromMap[A](map: SortedMap[A, Unit]): SortedSet[A] =
+      SortedSetFromMap(map)
   }
 
 }

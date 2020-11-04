@@ -16,7 +16,7 @@ package immutable
 
 import scala.collection.generic.DefaultSerializable
 
-private trait SetFromMapOps[
+private[collection] trait SetFromMapOps[
     A,
     +MM[K, +V] <: MapOps[K, V, MM, _],
     +M <: MapOps[A, Unit, MM, M],
@@ -29,7 +29,7 @@ private trait SetFromMapOps[
   override def removedAll(that: IterableOnce[A]): C = fromSpecificMap(underlying removedAll that)
 }
 
-private object SetFromMapOps {
+private[collection] object SetFromMapOps {
 
   trait Unsorted[
       A,
@@ -43,7 +43,7 @@ private object SetFromMapOps {
 }
 
 @SerialVersionUID(3L)
-private class SetFromMap[A](protected[collection] val underlying: Map[A, Unit])
+private[collection] class SetFromMap[A](protected[collection] val underlying: Map[A, Unit])
     extends AbstractSet[A]
     with SetFromMapOps.Unsorted[A, Map, SetFromMap]
     with collection.SetFromMapOps.DynamicClassName
@@ -55,21 +55,29 @@ private class SetFromMap[A](protected[collection] val underlying: Map[A, Unit])
     new SetFromMap.WrapperFactory(underlying.mapFactory)
 }
 
-private object SetFromMap extends SetFromMapMetaFactory[Map, Set] {
-  def apply(factory: MapFactory[Map]): IterableFactory[Set] = new WrapperFactory(factory)
+private[collection] object SetFromMap extends SetFromMapMetaFactory[Map, Set] {
+  def apply(factory: MapFactory[Map]): IterableFactory[Set] = new DynamicFactory(factory)
 
-  def apply[A](map: Map[A, Unit]): Set[A] = new SetFromMap(map)
+  def apply[A](map: Map[A, Unit]): Set[A] = map match {
+    case map: SeqMap[A, Unit]    => SeqSetFromMap(map)
+    case map: SortedMap[A, Unit] => SortedSetFromMap(map)
+    case map                     => apply(map)
+  }
 
   @SerialVersionUID(3L)
   private class WrapperFactory(mf: MapFactory[Map]) extends SetFromMapFactory[Map, SetFromMap](mf) {
-    protected[this] def fromMap[A](map: Map[A, Unit]): SetFromMap[A] =
-      new SetFromMap(map)
+    protected[this] def fromMap[A](map: Map[A, Unit]): SetFromMap[A] = new SetFromMap(map)
+  }
+
+  @SerialVersionUID(3L)
+  private class DynamicFactory(mf: MapFactory[Map]) extends SetFromMapFactory[Map, Set](mf) {
+    protected[this] def fromMap[A](map: Map[A, Unit]): Set[A] = SetFromMap(map)
   }
 
 }
 
 @SerialVersionUID(3L)
-private class SeqSetFromMap[A](protected[collection] val underlying: SeqMap[A, Unit])
+private[collection] class SeqSetFromMap[A](protected[collection] val underlying: SeqMap[A, Unit])
     extends AbstractSet[A]
     with SetFromMapOps.Unsorted[A, SeqMap, SeqSetFromMap]
     with collection.SetFromMapOps.DynamicClassName
@@ -83,7 +91,7 @@ private class SeqSetFromMap[A](protected[collection] val underlying: SeqMap[A, U
     new SeqSetFromMap.WrapperFactory(underlying.mapFactory)
 }
 
-private object SeqSetFromMap extends SetFromMapMetaFactory[SeqMap, SeqSet] {
+private[collection] object SeqSetFromMap extends SetFromMapMetaFactory[SeqMap, SeqSet] {
   def apply(factory: MapFactory[SeqMap]): IterableFactory[SeqSet] = new WrapperFactory(factory)
 
   def apply[A](map: SeqMap[A, Unit]): SeqSet[A] = new SeqSetFromMap(map)
@@ -91,16 +99,16 @@ private object SeqSetFromMap extends SetFromMapMetaFactory[SeqMap, SeqSet] {
   @SerialVersionUID(3L)
   private class WrapperFactory(mf: MapFactory[SeqMap])
       extends SetFromMapFactory[SeqMap, SeqSetFromMap](mf) {
-    protected[this] def fromMap[A](map: SeqMap[A, Unit]): SeqSetFromMap[A] =
-      new SeqSetFromMap(map)
+    protected[this] def fromMap[A](map: SeqMap[A, Unit]): SeqSetFromMap[A] = new SeqSetFromMap(map)
   }
 
 }
 
 @SerialVersionUID(3L)
-private class SortedSetFromMap[A](protected[collection] val underlying: SortedMap[A, Unit])(implicit
-    val ordering: Ordering[A]
-) extends AbstractSet[A]
+private[collection] class SortedSetFromMap[A](
+    protected[collection] val underlying: SortedMap[A, Unit]
+)(implicit val ordering: Ordering[A])
+    extends AbstractSet[A]
     with SetFromMapOps[A, Map, SortedMap[A, Unit], Set, SortedSetFromMap[A]]
     with collection.SetFromMapOps.Sorted[A, SortedMap, Set, SortedSetFromMap]
     with collection.SetFromMapOps.DynamicClassName
@@ -125,7 +133,8 @@ private class SortedSetFromMap[A](protected[collection] val underlying: SortedMa
   override def incl(elem: A): SortedSetFromMap[A] = ssfm(underlying.updated(elem, ()))
 }
 
-private object SortedSetFromMap extends SortedSetFromMapMetaFactory[SortedMap, SortedSet] {
+private[collection] object SortedSetFromMap
+    extends SortedSetFromMapMetaFactory[SortedMap, SortedSet] {
   @inline private def ssfm[A: Ordering](map: SortedMap[A, Unit]): SortedSetFromMap[A] =
     new SortedSetFromMap(map)
 

@@ -309,7 +309,7 @@ private object SetFromMapOps {
 
 }
 
-private abstract class SetFromMapFactory[+MM[K, V] <: Map[K, V], +CC[A] <: WrappedMap[A]](
+private abstract class SetFromMapFactory[+MM[K, V] <: Map[K, V], +CC[A] <: Set[A]](
     mf: MapFactory[MM]
 ) extends IterableFactory[CC]
     with Serializable {
@@ -346,10 +346,9 @@ private abstract class SetFromMapFactory[+MM[K, V] <: Map[K, V], +CC[A] <: Wrapp
 
 }
 
-private abstract class SortedSetFromMapFactory[+MM[K, V] <: SortedMap[K, V], +CC[A] <: WrappedMap[
-  A
-]](mf: SortedMapFactory[MM])
-    extends SortedIterableFactory[CC]
+private abstract class SortedSetFromMapFactory[+MM[K, V] <: SortedMap[K, V], +CC[A] <: Set[A]](
+    mf: SortedMapFactory[MM]
+) extends SortedIterableFactory[CC]
     with Serializable {
   protected[this] def fromMap[A](map: MM[A, Unit]): CC[A]
 
