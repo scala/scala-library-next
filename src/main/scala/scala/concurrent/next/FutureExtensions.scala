@@ -10,7 +10,7 @@
  * additional information regarding copyright ownership.
  */
 
-package scala.collection.next
+package scala.concurrent.next
 
 import scala.concurrent.{Future, ExecutionContext}
 import scala.util.next.TryExtensions._
