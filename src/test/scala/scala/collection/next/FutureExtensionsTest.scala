@@ -16,7 +16,10 @@ import org.junit.Assert._
 import org.junit.Test
 import scala.concurrent.{Await, Future}
 import scala.concurrent.ExecutionContext.Implicits.global
+//import scala.concurrent.ExecutionContext._
 import scala.concurrent.duration._
+import scala.concurrent.ExecutionContext
+import scala.concurrent.Promise
 
 final class FutureExtensionsTest{
 
@@ -25,8 +28,10 @@ final class FutureExtensionsTest{
     @Test
     def futureSuccessTapEachTest(): Unit = {
 
-        val input: Future[List[Option[Int]]] = Future.successful(List(Some(1), None, Some(2), Some(3), Some(4)))
+        implicit val ec = ExecutionContext.parasitic
+        val input: Future[List[Option[Int]]] = Future(List(Some(1), None, Some(2), Some(3), Some(4)))
         val expected: Future[List[Int]] = Future.successful(List(3, 4, 17))
+        //val expected: List[Int] = List(3, 4, 17)
         
         var num = 0 
 
@@ -40,9 +45,21 @@ final class FutureExtensionsTest{
             .map(_  :+ num)
         }
 
-        val awaited = Await.ready(tapAndMutate(input), 5.second)
+        val awaited = Await.result(tapAndMutate(input), 5.second)
+        val awaited2 = Await.result(expected, 5.second)
 
-        assertEquals(expected, awaited)
+       /* val p = Promise[String]
+    val q = Promise[String]
+    val res = Promise[String]
+    val s = "hi"
+    p.future.onComplete(t => res.complete(t))
+    q.future.onComplete(t => res.complete(t))   // previously, uncompleted promise held reference to promise completed with value
+    assertNotReachable(s, q) {
+      p.complete(Try(s))
+    }
+    */
+
+        assertEquals(awaited2, awaited)
     }
 
     /*
