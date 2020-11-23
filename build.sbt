@@ -19,7 +19,11 @@ lazy val scalaLibraryNext = crossProject(JVMPlatform, JSPlatform)
   .settings(
     ScalaModulePlugin.scalaModuleSettings,
     scalaModuleMimaPreviousVersion := None,
-    scalacOptions ++= Seq("-deprecation", "-feature", "-Werror"),
+    scalacOptions ++= Seq(
+      "-feature",
+      "-Werror",
+      "-Xlint",
+    ),
     libraryDependencies ++= Seq(
       "org.scalacheck" %%% "scalacheck" % "1.15.1" % Test,
     ),
