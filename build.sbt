@@ -21,7 +21,7 @@ lazy val scalaLibraryNext = crossProject(JVMPlatform, JSPlatform)
     scalaModuleMimaPreviousVersion := None,
     scalacOptions ++= Seq("-deprecation", "-feature", "-Werror"),
     libraryDependencies ++= Seq(
-      "org.scalacheck" %%% "scalacheck" % "1.14.3" % Test,
+      "org.scalacheck" %%% "scalacheck" % "1.15.1" % Test,
     ),
   )
   .jsSettings(
