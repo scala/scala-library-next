@@ -17,8 +17,6 @@ import org.junit.Test
 import scala.collection.IterableOnceOps
 import scala.collection.generic.IsIterableOnce
 
-import IterableOnceExtensions._
-
 final class TestIterableOnceExtensions {
   import TestIterableOnceExtensions.LowerCaseString
 
@@ -34,7 +32,7 @@ final class TestIterableOnceExtensions {
 
   @Test
   def iterableOnceOpsGroupMapReduce(): Unit = {
-    def occurrences[A](coll: IterableOnceOps[A, Any, Any]): Map[A, Int] =
+    def occurrences[A, CC[_], C](coll: IterableOnceOps[A, CC, C]): Map[A, Int] =
       coll.groupMapReduce(identity)(_ => 1)(_ + _)
 
     val xs = Seq('a', 'b', 'b', 'c', 'a', 'a', 'a', 'b')
