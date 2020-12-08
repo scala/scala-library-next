@@ -44,7 +44,7 @@ private[next] final class NextIterableOnceOpsExtensions[A, CC[_], C](
 
 object NextIterableOnceOpsExtensions {
   final case class GroupMap[A, K, V, CC[_], MC[_, _]](
-    col: IterableOnceOps[A, Any, Any],
+    col: IterableOnceOps[A, AnyConstr, _],
     key: A => K,
     f: A => V,
     colFactory: Factory[V, CC[V]],
