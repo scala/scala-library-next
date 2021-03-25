@@ -16,7 +16,7 @@ package object next {
   implicit class NextStdInExtensions(si: StdIn) {
     /** Reads and applying a function on an entire line of the default input .
      *
-     *  @return the Byte that was read
+     *  @return the object A that was read
      *  @throws java.io.EOFException if the end of the
      *  input stream has been reached.
      */
