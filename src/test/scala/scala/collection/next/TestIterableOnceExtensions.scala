@@ -16,7 +16,7 @@ import org.junit.Assert._
 import org.junit.Test
 import scala.collection.IterableOnceOps
 import scala.collection.generic.IsIterableOnce
-import scala.collection.immutable.{SortedMap, SortedSet}
+import scala.collection.immutable.{ArraySeq, BitSet, SortedMap, SortedSet}
 
 final class TestIterableOnceExtensions {
   import TestIterableOnceExtensions._
@@ -24,54 +24,57 @@ final class TestIterableOnceExtensions {
   // groupMapReduce --------------------------------------------
   @Test
   def iteratorGroupMapReduce(): Unit = {
-    def occurrences[A](coll: IterableOnce[A]): Map[A, Int] =
-      coll.iterator.groupMapReduce(identity)(_ => 1)(_ + _)
+    def occurrences[A](data: IterableOnce[A]): Map[A, Int] =
+      data.iterator.groupMapReduce(identity)(_ => 1)(_ + _)
 
-    val xs = Seq('a', 'b', 'b', 'c', 'a', 'a', 'a', 'b')
+    val data = Seq('a', 'b', 'b', 'c', 'a', 'a', 'a', 'b')
     val expected = Map('a' -> 4, 'b' -> 3, 'c' -> 1)
-    assertEquals(expected, occurrences(xs))
+
+    assertEquals(expected, occurrences(data))
   }
 
   @Test
   def iterableOnceOpsGroupMapReduce(): Unit = {
-    def occurrences[A, CC[_], C](coll: IterableOnceOps[A, CC, C]): Map[A, Int] =
-      coll.groupMapReduce(identity)(_ => 1)(_ + _)
+    def occurrences[A, CC[_], C](data: IterableOnceOps[A, CC, C]): Map[A, Int] =
+      data.groupMapReduce(identity)(_ => 1)(_ + _)
 
-    val xs = Seq('a', 'b', 'b', 'c', 'a', 'a', 'a', 'b')
+    val data = Seq('a', 'b', 'b', 'c', 'a', 'a', 'a', 'b')
     val expected = Map('a' -> 4, 'b' -> 3, 'c' -> 1)
-    assertEquals(expected, occurrences(xs))
+
+    assertEquals(expected, occurrences(data))
   }
 
   @Test
   def anyLikeIterableOnceGroupMapReduce(): Unit = {
-    def occurrences[Repr](coll: Repr)(implicit it: IsIterableOnce[Repr]): Map[it.A, Int] =
-      it(coll).iterator.groupMapReduce(identity)(_ => 1)(_ + _)
+    def occurrences[Repr](data: Repr)(implicit it: IsIterableOnce[Repr]): Map[it.A, Int] =
+      it(data).iterator.groupMapReduce(identity)(_ => 1)(_ + _)
 
-    val xs = "abbcaaab"
+    val data = "abbcaaab"
     val expected = Map('a' -> 4, 'b' -> 3, 'c' -> 1)
-    assertEquals(expected, occurrences(xs))
+
+    assertEquals(expected, occurrences(data))
   }
 
   @Test
   def customIterableOnceOpsGroupMapReduce(): Unit = {
-    def occurrences(coll: LowerCaseString): Map[Char, Int] =
-      coll.groupMapReduce(identity)(_ => 1)(_ + _)
+    def occurrences(data: LowerCaseString): Map[Char, Int] =
+      data.groupMapReduce(identity)(_ => 1)(_ + _)
 
-    val xs = LowerCaseString("abBcAaAb")
+    val data = LowerCaseString("abBcAaAb")
     val expected = Map('a' -> 4, 'b' -> 3, 'c' -> 1)
-    assertEquals(expected, occurrences(xs))
+
+    assertEquals(expected, occurrences(data))
   }
   // -----------------------------------------------------------
 
-  // groupMapTo ------------------------------------------------
+  // GroupMapGenGen --------------------------------------------
   @Test
-  def anyCollectionGroupMapToFull(): Unit = {
+  def anyCollectionGroupMapGenResultAs(): Unit = {
     def getUniqueUsersByCountrySorted(data: List[Record]): List[(String, List[String])] =
       data
-        .groupMapTo(_.country)(_.user)
+        .groupMapGenGen(_.country)(_.user)
         .collectValuesAs(SortedSet)
-        .collectResultsAs(SortedMap)
-        .result
+        .resultAs(SortedMap)
         .view
         .mapValues(_.toList)
         .toList
@@ -95,44 +98,11 @@ final class TestIterableOnceExtensions {
   }
 
   @Test
-  def anyCollectionGroupByToFull(): Unit = {
-    def getUniqueWordsByFirstLetterSorted(data: List[String]): List[(Char, List[String])] =
-      data
-        .groupByTo(_.head)
-        .collectValuesAs(SortedSet)
-        .collectResultsAs(SortedMap)
-        .result
-        .view
-        .mapValues(_.toList)
-        .toList
-
-    val data = List(
-      "Autumn",
-      "Banana",
-      "April",
-      "Wilson",
-      "Apple",
-      "Apple",
-      "Winter",
-      "Banana"
-    )
-
-    val expected = List(
-      'A' -> List("Apple", "April", "Autumn"),
-      'B' -> List("Banana"),
-      'W' -> List("Wilson", "Winter")
-    )
-
-    assertEquals(expected, getUniqueWordsByFirstLetterSorted(data))
-  }
-
-  @Test
-  def anyCollectionGroupByToReduceFull(): Unit = {
+  def anyCollectionGroupMapGenGenReduce(): Unit = {
     def getAllWordsByFirstLetterSorted(data: List[String]): List[(Char, String)] =
       data
-        .groupByTo(_.head)
-        .collectResultsAs(SortedMap)
-        .reduce(_ ++ " " ++ _)
+        .groupByGenGen(_.head)
+        .reduceValuesAs(SortedMap)(_ ++ " " ++ _)
         .toList
 
     val data = List(
@@ -145,7 +115,6 @@ final class TestIterableOnceExtensions {
       "Winter",
       "Banana"
     )
-
     val expected = List(
       'A' -> "Autumn April Apple Apple",
       'B' -> "Banana Banana",
@@ -153,6 +122,64 @@ final class TestIterableOnceExtensions {
     )
 
     assertEquals(expected, getAllWordsByFirstLetterSorted(data))
+  }
+
+  @Test
+  def iterableOnceOpsGroupByGenSpecificFactory(): Unit = {
+    def bitsByEven(data: BitSet): Map[Boolean, BitSet] =
+      data.groupByGen(x => (x % 2) == 0).result
+
+    val data = BitSet(1, 2, 3, 4, 5)
+    val expected = Map(
+      true -> BitSet(2, 4),
+      false -> BitSet(1, 3, 5)
+    )
+
+    assertEquals(expected, bitsByEven(data))
+  }
+
+  @Test
+  def iterableOnceOpsGroupMapGenIterableFactory(): Unit = {
+    def bitsByEvenAsChars(data: BitSet): Map[Boolean, Set[Char]] =
+      data.groupMapGen(x => (x % 2) == 0)(_.toChar).result
+
+    val data = BitSet(100, 101, 102, 103, 104, 105)
+    val expected = Map(
+      true -> Set('d', 'f', 'h'),
+      false -> Set('e', 'g', 'i')
+    )
+
+    assertEquals(expected, bitsByEvenAsChars(data))
+  }
+
+  @Test
+  def iteratorGroupBy(): Unit = {
+    def getUniqueWordsByFirstLetter(data: IterableOnce[String]): List[(Char, Set[String])] =
+      data
+        .iterator
+        .groupBy(_.head)
+        .view
+        .mapValues(_.toSet)
+        .toList
+
+    val data = List(
+      "Autumn",
+      "Banana",
+      "April",
+      "Wilson",
+      "Apple",
+      "Apple",
+      "Winter",
+      "Banana"
+    )
+
+    val expected = List(
+      'A' -> Set("Apple", "April", "Autumn"),
+      'B' -> Set("Banana"),
+      'W' -> Set("Wilson", "Winter")
+    )
+
+    assertEquals(expected, getUniqueWordsByFirstLetter(data))
   }
   // -----------------------------------------------------------
 }
