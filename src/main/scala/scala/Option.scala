@@ -333,6 +333,17 @@ sealed abstract class Option[+A] extends IterableOnce[A] with Product with Seria
   @inline final def filterNot(p: A => Boolean): Option[A] =
     if (isEmpty || !p(this.get)) this else None
 
+  /** Apply the side-effecting function $f to the option's value,
+    * if it is nonempty. Otherwise, do nothing.
+    *
+    * @param f a function to apply to the option's value
+    * @tparam U the return type of f
+    * @return this Option
+    */
+  @inline final def tapEach[U](f: A => U): Option[A] = {
+    foreach(f); this
+  }
+
   /** Returns false if the option is $none, true otherwise.
     *
     * This is equivalent to:
