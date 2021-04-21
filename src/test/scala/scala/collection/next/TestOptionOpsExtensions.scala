@@ -12,9 +12,6 @@
 
 package scala.collection.next
 
-import org.junit.Assert._
-import org.junit.Test
-
 final class TestOptionOpsExtensions {
   // Compile checks the return type, no need to run as test.
   def tapEachReturnType(): Option[Int] = Option(5).tapEach(identity)
