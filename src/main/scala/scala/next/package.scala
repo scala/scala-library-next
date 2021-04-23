@@ -15,11 +15,11 @@ package scala
 package object next {
   implicit final class OptionOpsExtensions[A](val v: Option[A]) extends AnyVal {
     /** Apply the side-effecting function `f` to the option's value
-      *  if it is nonempty. Otherwise, do nothing.
-      *
-      *  @param  f  a function to apply to the option's value
-      *  @return the option
-      */
+     *  if it is nonempty. Otherwise, do nothing.
+     *
+     *  @param  f  a function to apply to the option's value
+     *  @return the option
+     */
     def tapEach[B](f: A => B): Option[A] = { v.foreach(f); v }
   }
 }
