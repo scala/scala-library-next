@@ -10,7 +10,7 @@
  * additional information regarding copyright ownership.
  */
 
-package scala.collection.next
+package scala.next
 
 final class TestOptionOpsExtensions {
   // Compile checks the return type, no need to run as test.
