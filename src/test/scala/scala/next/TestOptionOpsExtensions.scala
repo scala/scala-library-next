@@ -14,5 +14,9 @@ package scala.next
 
 final class TestOptionOpsExtensions {
   // Compile checks the return type, no need to run as test.
-  def tapEachReturnType(): Option[Int] = Option(5).tapEach(identity)
+  def tapEachReturnType(): Option[Int] = {
+    // Don't return the Option directly, so the compiler is not able to coerce a specific implicit to be used.
+    val opt = Option(5).tapEach(identity)
+    opt.map(identity)
+  }
 }
