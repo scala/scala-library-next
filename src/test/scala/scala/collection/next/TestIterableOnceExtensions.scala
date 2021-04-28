@@ -69,12 +69,12 @@ final class TestIterableOnceExtensions {
 
   // GroupMapGenGen --------------------------------------------
   @Test
-  def anyCollectionGroupMapGenResultAs(): Unit = {
+  def anyCollectionGroupMapToViewTo(): Unit = {
     def getUniqueUsersByCountrySorted(data: List[Record]): List[(String, List[String])] =
       data
-        .groupMapGenGen(_.country)(_.user)
-        .collectValuesAs(SortedSet)
-        .resultAs(SortedMap)
+        .viewGroupMap(_.country)(_.user)
+        .collectGroupsTo(SortedSet)
+        .to(SortedMap)
         .view
         .mapValues(_.toList)
         .toList
@@ -98,11 +98,11 @@ final class TestIterableOnceExtensions {
   }
 
   @Test
-  def anyCollectionGroupMapGenGenReduce(): Unit = {
+  def anyCollectionGroupMapViewReduceValuesTo(): Unit = {
     def getAllWordsByFirstLetterSorted(data: List[String]): List[(Char, String)] =
       data
-        .groupByGenGen(_.head)
-        .reduceValuesAs(SortedMap)(_ ++ " " ++ _)
+        .viewGroupBy(_.head)
+        .reduceValuesTo(SortedMap)(_ ++ " " ++ _)
         .toList
 
     val data = List(
@@ -125,9 +125,9 @@ final class TestIterableOnceExtensions {
   }
 
   @Test
-  def iterableOnceOpsGroupByGenSpecificFactory(): Unit = {
+  def iterableOnceOpsViewGroupByToSpecificFactoryToMap(): Unit = {
     def bitsByEven(data: BitSet): Map[Boolean, BitSet] =
-      data.groupByGen(x => (x % 2) == 0).result
+      data.viewGroupByTo(x => (x % 2) == 0).toMap
 
     val data = BitSet(1, 2, 3, 4, 5)
     val expected = Map(
@@ -139,9 +139,9 @@ final class TestIterableOnceExtensions {
   }
 
   @Test
-  def iterableOnceOpsGroupMapGenIterableFactory(): Unit = {
+  def iterableOnceOpsViewGroupMapToIterableFactoryToMap(): Unit = {
     def bitsByEvenAsChars(data: BitSet): Map[Boolean, Set[Char]] =
-      data.groupMapGen(x => (x % 2) == 0)(_.toChar).result
+      data.viewGroupMapTo(x => (x % 2) == 0)(_.toChar).toMap
 
     val data = BitSet(100, 101, 102, 103, 104, 105)
     val expected = Map(

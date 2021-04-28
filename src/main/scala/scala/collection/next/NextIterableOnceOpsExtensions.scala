@@ -16,25 +16,25 @@ package next
 private[next] final class NextIterableOnceOpsExtensions[A, CC[_], C](
   private val col: IterableOnceOps[A, CC, C]
 ) extends AnyVal {
-  import NextIterableOnceOpsExtensions.{GroupMapGen, GroupMapGenGen}
+  import NextIterableOnceOpsExtensions.{GroupMapToView, GroupMapView}
 
-  def groupBy[K](key: A => K)(implicit valuesFactory: Factory[A, C]): immutable.Map[K, C] =
-    groupByGen(key).result
+  def groupBy[K](key: A => K)(implicit groupsFactory: Factory[A, C]): immutable.Map[K, C] =
+    viewGroupByTo(key).toMap
 
-  def groupByGen[K](key: A => K)(implicit valuesFactory: Factory[A, C]): GroupMapGen[A, K, A, C] =
-    groupByGenGen(key).collectValuesAs(valuesFactory)
+  def viewGroupByTo[K](key: A => K)(implicit groupsFactory: Factory[A, C]): GroupMapToView[A, K, A, C] =
+    viewGroupBy(key).collectGroupsTo(groupsFactory)
 
-  def groupByGenGen[K](key: A => K): GroupMapGenGen[A, K, A] =
-    groupMapGenGen(key)(identity)
+  def viewGroupBy[K](key: A => K): GroupMapView[A, K, A] =
+    viewGroupMap(key)(identity)
 
-  def groupMap[K, V](key: A => K)(f: A => V)(implicit valuesFactory: Factory[V, CC[V]]): immutable.Map[K, CC[V]] =
-    groupMapGen(key)(f).result
+  def groupMap[K, V](key: A => K)(f: A => V)(implicit groupsFactory: Factory[V, CC[V]]): immutable.Map[K, CC[V]] =
+    viewGroupMapTo(key)(f).toMap
 
-  def groupMapGen[K, V](key: A => K)(f: A => V)(implicit valuesFactory: Factory[V, CC[V]]): GroupMapGen[A, K, V, CC[V]] =
-    groupMapGenGen(key)(f).collectValuesAs(valuesFactory)
+  def viewGroupMapTo[K, V](key: A => K)(f: A => V)(implicit groupsFactory: Factory[V, CC[V]]): GroupMapToView[A, K, V, CC[V]] =
+    viewGroupMap(key)(f).collectGroupsTo(groupsFactory)
 
-  def groupMapGenGen[K, V](key: A => K)(f: A => V): GroupMapGenGen[A, K, V] =
-    new GroupMapGenGen(col, key, f)
+  def viewGroupMap[K, V](key: A => K)(f: A => V): GroupMapView[A, K, V] =
+    new GroupMapView(col, key, f)
 
   /**
    * Partitions this IterableOnce into a map according to a discriminator function `key`. All the values that
@@ -49,19 +49,16 @@ private[next] final class NextIterableOnceOpsExtensions[A, CC[_], C](
    * @note This will force the evaluation of the Iterator.
    */
   def groupMapReduce[K, V](key: A => K)(f: A => V)(reduce: (V, V) => V): immutable.Map[K, V] =
-    groupMapGenGen(key)(f).reduceValues(reduce)
+    viewGroupMap(key)(f).reduceValuesTo(immutable.Map)(reduce)
 }
 
 private[next] object NextIterableOnceOpsExtensions {
-  final class GroupMapGenGen[A, K, V] private[NextIterableOnceOpsExtensions](
+  final class GroupMapView[A, K, V] private[NextIterableOnceOpsExtensions](
     col: IterableOnceOps[A, AnyConstr, _],
     key: A => K,
     f: A => V
   ) {
-    def reduceValues(reduce: (V, V) => V): immutable.Map[K, V] =
-      reduceValuesAs(immutable.Map)(reduce)
-
-    def reduceValuesAs[MC](resultFactory: Factory[(K, V), MC])(reduce: (V, V) => V): MC = {
+    def reduceValuesTo[MC](resultFactory: Factory[(K, V), MC])(reduce: (V, V) => V): MC = {
       val m = mutable.Map.empty[K, V]
       col.foreach { elem =>
         m.updateWith(key = key(elem)) {
@@ -72,27 +69,27 @@ private[next] object NextIterableOnceOpsExtensions {
       resultFactory.fromSpecific(m)
     }
 
-    def collectValuesAs[C](valuesFactory: Factory[V, C]): GroupMapGen[A, K, V, C] =
-      new GroupMapGen(col, key, f, valuesFactory)
+    def collectGroupsTo[C](groupsFactory: Factory[V, C]): GroupMapToView[A, K, V, C] =
+      new GroupMapToView(col, key, f, groupsFactory)
   }
 
-  final class GroupMapGen[A, K, V, C] private[NextIterableOnceOpsExtensions](
+  final class GroupMapToView[A, K, V, C] private[NextIterableOnceOpsExtensions](
     col: IterableOnceOps[A, AnyConstr, _],
     key: A => K,
     f: A => V,
-    valuesFactory: Factory[V, C]
+    groupsFactory: Factory[V, C]
   ) {
-    def result: immutable.Map[K, C] =
-      resultAs(immutable.Map)
+    def toMap: immutable.Map[K, C] =
+      to(immutable.Map)
 
-    def resultAs[MC](resultFactory: Factory[(K, C), MC]): MC = {
+    def to[MC](resultFactory: Factory[(K, C), MC]): MC = {
       val m = mutable.Map.empty[K, mutable.Builder[V, C]]
       col.foreach { elem =>
         val k = key(elem)
         val v = f(elem)
         m.get(k) match {
           case Some(builder) => builder.addOne(v)
-          case None          => m.update(key = k, value = valuesFactory.newBuilder.addOne(v))
+          case None          => m.update(key = k, value = groupsFactory.newBuilder.addOne(v))
         }
       }
       resultFactory.fromSpecific(m.view.mapValues(_.result()))
