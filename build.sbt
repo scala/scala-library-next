@@ -18,6 +18,7 @@ lazy val scalaLibraryNext = crossProject(JVMPlatform, JSPlatform)
   .jsConfigure(_.enablePlugins(ScalaJSJUnitPlugin))
   .settings(
     ScalaModulePlugin.scalaModuleSettings,
+    scalaModuleAutomaticModuleName := Some("scala.library.next"),
     scalaModuleMimaPreviousVersion := None,
     scalacOptions ++= Seq("-deprecation", "-feature", "-Werror"),
     libraryDependencies ++= Seq(
