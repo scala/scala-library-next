@@ -13,7 +13,7 @@
 package scala
 
 package object next {
-  implicit final class OptionOpsExtensions[A](val v: Option[A]) extends AnyVal {
+  implicit final class OptionOpsExtensions[A](private val v: Option[A]) extends AnyVal {
     /** Apply the side-effecting function `f` to the option's value
      *  if it is nonempty. Otherwise, do nothing.
      *
