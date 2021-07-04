@@ -15,7 +15,7 @@ lazy val scalaLibraryNext = crossProject(JVMPlatform, JSPlatform)
     libraryDependencies += "com.novocode" % "junit-interface" % "0.11" % Test,
     testOptions += Tests.Argument(TestFrameworks.JUnit, "-a", "-v"),
   )
-  .jsConfigure(_.enablePlugins(ScalaJSJUnitPlugin))
+  .jsEnablePlugins(ScalaJSJUnitPlugin)
   .settings(
     ScalaModulePlugin.scalaModuleSettings,
     scalaModuleMimaPreviousVersion := None,
