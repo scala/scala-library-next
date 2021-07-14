@@ -34,6 +34,7 @@ verPat="[0-9]+\.[0-9]+\.[0-9]+(-[A-Za-z0-9-]+)?"
 tagPat="^v$verPat(#.*)?$"
 
 if [[ "$TRAVIS_TAG" =~ $tagPat ]]; then
+  versionCheckTask="versionCheck"
   releaseTask="ci-release"
   if ! isReleaseJob; then
     echo "Not releasing on Java $ADOPTOPENJDK with Scala $TRAVIS_SCALA_VERSION"
@@ -50,4 +51,4 @@ export CI_SNAPSHOT_RELEASE="${projectPrefix}publish"
 # for now, until we're confident in the new release scripts, just close the staging repo.
 export CI_SONATYPE_RELEASE="; sonatypePrepare; sonatypeBundleUpload; sonatypeClose"
 
-sbt clean ${projectPrefix}test ${projectPrefix}publishLocal $releaseTask
+sbt clean ${projectPrefix}test versionPolicyCheck ${projectPrefix}publishLocal $versionCheckTask $releaseTask
