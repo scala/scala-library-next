@@ -10,8 +10,10 @@ scala:
 env:
   - SCALAJS_BUILD=     ADOPTOPENJDK=8
   - SCALAJS_BUILD=     ADOPTOPENJDK=11
+  - SCALAJS_BUILD=     ADOPTOPENJDK=17
   - SCALAJS_BUILD=true ADOPTOPENJDK=8
   - SCALAJS_BUILD=true ADOPTOPENJDK=11
+  - SCALAJS_BUILD=true ADOPTOPENJDK=17
 
 install:
   - git fetch --tags # get all tags for sbt-dynver
