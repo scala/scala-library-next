@@ -18,7 +18,8 @@ lazy val scalaLibraryNext = crossProject(JVMPlatform, JSPlatform)
   .jsEnablePlugins(ScalaJSJUnitPlugin)
   .settings(
     ScalaModulePlugin.scalaModuleSettings,
-    scalaModuleMimaPreviousVersion := None,
+    scalaModuleAutomaticModuleName := Some("scala.library.next"),
+    versionPolicyIntention := Compatibility.None, // TODO Change to `Compatibility.BinaryAndSourceCompatible` after the first release
     scalacOptions ++= Seq("-deprecation", "-feature", "-Werror"),
     libraryDependencies ++= Seq(
       "org.scalacheck" %%% "scalacheck" % "1.15.4" % Test,
