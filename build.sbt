@@ -24,7 +24,7 @@ lazy val scalaLibraryNext = crossProject(JVMPlatform, JSPlatform)
     versionPolicyIntention := Compatibility.None, // TODO Change to `Compatibility.BinaryAndSourceCompatible` after the first release
     scalacOptions ++= Seq("-deprecation", "-feature", "-Werror"),
     libraryDependencies ++= Seq(
-      "org.scalacheck" %%% "scalacheck" % "1.18.0" % Test,
+      "org.scalacheck" %%% "scalacheck" % "1.18.1" % Test,
     ),
   )
   .jsSettings(
