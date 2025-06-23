@@ -16,49 +16,172 @@ import org.junit.Assert._
 import org.junit.Test
 import scala.collection.IterableOnceOps
 import scala.collection.generic.IsIterableOnce
+import scala.collection.immutable.{ArraySeq, BitSet, SortedMap, SortedSet}
 
 final class TestIterableOnceExtensions {
-  import TestIterableOnceExtensions.LowerCaseString
+  import TestIterableOnceExtensions._
 
+  // groupMapReduce --------------------------------------------
   @Test
   def iteratorGroupMapReduce(): Unit = {
-    def occurrences[A](coll: IterableOnce[A]): Map[A, Int] =
-      coll.iterator.groupMapReduce(identity)(_ => 1)(_ + _)
+    def occurrences[A](data: IterableOnce[A]): Map[A, Int] =
+      data.iterator.groupMapReduce(identity)(_ => 1)(_ + _)
 
-    val xs = Seq('a', 'b', 'b', 'c', 'a', 'a', 'a', 'b')
+    val data = Seq('a', 'b', 'b', 'c', 'a', 'a', 'a', 'b')
     val expected = Map('a' -> 4, 'b' -> 3, 'c' -> 1)
-    assertEquals(expected, occurrences(xs))
+
+    assertEquals(expected, occurrences(data))
   }
 
   @Test
   def iterableOnceOpsGroupMapReduce(): Unit = {
-    def occurrences[A, CC[_], C](coll: IterableOnceOps[A, CC, C]): Map[A, Int] =
-      coll.groupMapReduce(identity)(_ => 1)(_ + _)
+    def occurrences[A, CC[_], C](data: IterableOnceOps[A, CC, C]): Map[A, Int] =
+      data.groupMapReduce(identity)(_ => 1)(_ + _)
 
-    val xs = Seq('a', 'b', 'b', 'c', 'a', 'a', 'a', 'b')
+    val data = Seq('a', 'b', 'b', 'c', 'a', 'a', 'a', 'b')
     val expected = Map('a' -> 4, 'b' -> 3, 'c' -> 1)
-    assertEquals(expected, occurrences(xs))
+
+    assertEquals(expected, occurrences(data))
   }
 
   @Test
   def anyLikeIterableOnceGroupMapReduce(): Unit = {
-    def occurrences[Repr](coll: Repr)(implicit it: IsIterableOnce[Repr]): Map[it.A, Int] =
-      it(coll).iterator.groupMapReduce(identity)(_ => 1)(_ + _)
+    def occurrences[Repr](data: Repr)(implicit it: IsIterableOnce[Repr]): Map[it.A, Int] =
+      it(data).iterator.groupMapReduce(identity)(_ => 1)(_ + _)
 
-    val xs = "abbcaaab"
+    val data = "abbcaaab"
     val expected = Map('a' -> 4, 'b' -> 3, 'c' -> 1)
-    assertEquals(expected, occurrences(xs))
+
+    assertEquals(expected, occurrences(data))
   }
 
   @Test
   def customIterableOnceOpsGroupMapReduce(): Unit = {
-    def occurrences(coll: LowerCaseString): Map[Char, Int] =
-      coll.groupMapReduce(identity)(_ => 1)(_ + _)
+    def occurrences(data: LowerCaseString): Map[Char, Int] =
+      data.groupMapReduce(identity)(_ => 1)(_ + _)
 
-    val xs = LowerCaseString("abBcAaAb")
+    val data = LowerCaseString("abBcAaAb")
     val expected = Map('a' -> 4, 'b' -> 3, 'c' -> 1)
-    assertEquals(expected, occurrences(xs))
+
+    assertEquals(expected, occurrences(data))
   }
+  // -----------------------------------------------------------
+
+  // GroupMapGenGen --------------------------------------------
+  @Test
+  def anyCollectionGroupMapToViewTo(): Unit = {
+    def getUniqueUsersByCountrySorted(data: List[Record]): List[(String, List[String])] =
+      data
+        .viewGroupMap(_.country)(_.user)
+        .collectGroupsTo(SortedSet)
+        .to(SortedMap)
+        .view
+        .mapValues(_.toList)
+        .toList
+
+    val data = List(
+      Record(user = "Luis", country = "Colombia"),
+      Record(user = "Seth", country = "USA"),
+      Record(user = "April", country =  "USA"),
+      Record(user = "Julien", country = "Suisse"),
+      Record(user = "Rob", country =  "USA"),
+      Record(user = "Seth", country = "USA")
+    )
+
+    val expected = List(
+      "Colombia" -> List("Luis"),
+      "Suisse" -> List("Julien"),
+      "USA" -> List("April", "Rob", "Seth")
+    )
+
+    assertEquals(expected, getUniqueUsersByCountrySorted(data))
+  }
+
+  @Test
+  def anyCollectionGroupMapViewReduceValuesTo(): Unit = {
+    def getAllWordsByFirstLetterSorted(data: List[String]): List[(Char, String)] =
+      data
+        .viewGroupBy(_.head)
+        .reduceValuesTo(SortedMap)(_ ++ " " ++ _)
+        .toList
+
+    val data = List(
+      "Autumn",
+      "Banana",
+      "April",
+      "Wilson",
+      "Apple",
+      "Apple",
+      "Winter",
+      "Banana"
+    )
+    val expected = List(
+      'A' -> "Autumn April Apple Apple",
+      'B' -> "Banana Banana",
+      'W' -> "Wilson Winter"
+    )
+
+    assertEquals(expected, getAllWordsByFirstLetterSorted(data))
+  }
+
+  @Test
+  def iterableOnceOpsViewGroupByToSpecificFactoryToMap(): Unit = {
+    def bitsByEven(data: BitSet): Map[Boolean, BitSet] =
+      data.viewGroupByTo(x => (x % 2) == 0).toMap
+
+    val data = BitSet(1, 2, 3, 4, 5)
+    val expected = Map(
+      true -> BitSet(2, 4),
+      false -> BitSet(1, 3, 5)
+    )
+
+    assertEquals(expected, bitsByEven(data))
+  }
+
+  @Test
+  def iterableOnceOpsViewGroupMapToIterableFactoryToMap(): Unit = {
+    def bitsByEvenAsChars(data: BitSet): Map[Boolean, Set[Char]] =
+      data.viewGroupMapTo(x => (x % 2) == 0)(_.toChar).toMap
+
+    val data = BitSet(100, 101, 102, 103, 104, 105)
+    val expected = Map(
+      true -> Set('d', 'f', 'h'),
+      false -> Set('e', 'g', 'i')
+    )
+
+    assertEquals(expected, bitsByEvenAsChars(data))
+  }
+
+  @Test
+  def iteratorGroupBy(): Unit = {
+    def getUniqueWordsByFirstLetter(data: IterableOnce[String]): List[(Char, Set[String])] =
+      data
+        .iterator
+        .groupBy(_.head)
+        .view
+        .mapValues(_.toSet)
+        .toList
+
+    val data = List(
+      "Autumn",
+      "Banana",
+      "April",
+      "Wilson",
+      "Apple",
+      "Apple",
+      "Winter",
+      "Banana"
+    )
+
+    val expected = List(
+      'A' -> Set("Apple", "April", "Autumn"),
+      'B' -> Set("Banana"),
+      'W' -> Set("Wilson", "Winter")
+    )
+
+    assertEquals(expected, getUniqueWordsByFirstLetter(data))
+  }
+  // -----------------------------------------------------------
 }
 
 object TestIterableOnceExtensions {
@@ -81,4 +204,6 @@ object TestIterableOnceExtensions {
     override def span(p: Char => Boolean): (String, String) = ???
     override def tapEach[U](f: Char => U): String = ???
   }
+
+  final case class Record(user: String, country: String)
 }
