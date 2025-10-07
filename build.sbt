@@ -1,4 +1,4 @@
-ThisBuild / scalaVersion := "2.13.16"
+ThisBuild / scalaVersion := "2.13.17"
 
 lazy val root = project.in(file("."))
   .aggregate(scalaLibraryNextJVM, scalaLibraryNextJS)
