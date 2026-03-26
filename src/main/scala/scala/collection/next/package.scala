@@ -19,4 +19,9 @@ package object next {
     col: IterableOnceOps[A, CC, C]
   ): NextIterableOnceOpsExtensions[A, CC, C] =
     new NextIterableOnceOpsExtensions(col)
+
+  implicit final def scalaNextSyntaxForIterableOps[A, CC[_], C](
+    coll: IterableOps[A, CC, C]
+  ): NextIterableOpsOps[A, CC, C] =
+    new NextIterableOpsOps(coll)
 }
