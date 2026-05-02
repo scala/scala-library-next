@@ -12,6 +12,8 @@
 
 package scala
 
+import scala.language.implicitConversions
+
 package object next {
   implicit final class OptionOpsExtensions[A](private val v: Option[A]) extends AnyVal {
     /** Apply the side-effecting function `f` to the option's value
@@ -22,4 +24,9 @@ package object next {
      */
     def tapEach[B](f: A => B): Option[A] = { v.foreach(f); v }
   }
+
+  implicit final def scalaNextSyntaxForStringOps(
+    str: String
+  ): NextStringOpsExtensions =
+    new NextStringOpsExtensions(str)
 }
